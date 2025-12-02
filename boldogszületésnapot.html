@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panka Adventi Kalendáriuma ❤️</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            background: #0a0a0a;
+        }
+
+        /* Első fázis - videó háttér */
+        .video-intro {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s ease;
+            cursor: pointer;
+        }
+
+        .video-intro.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .video-intro video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .intro-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 2rem;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(255, 105, 180, 0.8),
+                         0 0 40px rgba(255, 105, 180, 0.6);
+            animation: neonPulse 2s ease-in-out infinite;
+            opacity: 0;
+            pointer-events: none;
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .intro-text.visible {
+            opacity: 1;
+        }
+
+        .intro-text:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            text-shadow: 0 0 30px rgba(255, 105, 180, 1),
+                         0 0 60px rgba(255, 105, 180, 0.8);
+        }
+
+        @keyframes neonPulse {
+            0%, 100% { text-shadow: 0 0 20px rgba(255, 105, 180, 0.8), 0 0 40px rgba(255, 105, 180, 0.6); }
+            50% { text-shadow: 0 0 30px rgba(255, 105, 180, 1), 0 0 60px rgba(255, 105, 180, 0.8); }
+        }
+
+        /* Ajtó animáció */
+        .door-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 999;
+            pointer-events: none;
+            perspective: 1000px;
+        }
+
+        .door {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            background: #8b4513;
+            transition: transform 2s ease-in-out;
+            transform-origin: center;
+        }
+
+        .door.left {
+            left: 0;
+            transform-origin: left center;
+        }
+
+        .door.right {
+            right: 0;
+            transform-origin: right center;
+        }
+
+        .door-container.open .door.left {
+            transform: rotateY(-120deg);
+        }
+
+        .door-container.open .door.right {
+            transform: rotateY(120deg);
+        }
+
+        /* Fő konténer */
+        .main-container {
+            position: relative;
+            min-height: 100vh;
+            background: url('bg2.png') center/cover no-repeat fixed;
+        }
+
+        .main-container::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 0;
+        }
+
+        /* Hóesés */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: #fff;
+            font-size: 1em;
+            font-family: Arial, sans-serif;
+            text-shadow: 0 0 5px #fff;
+            z-index: 1;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        /* Fejléc */
+        header {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 40px 20px;
+            color: #fff;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            text-shadow: 0 0 20px rgba(255, 105, 180, 0.8),
+                         0 0 40px rgba(255, 105, 180, 0.6);
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Naptár rács */
+        .calendar-grid {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 15px;
+            }
+        }
+
+        /* Ajándék doboz */
+        .gift-box {
+            aspect-ratio: 1;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .gift-box:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        .gift-box.locked {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .gift-box.locked:hover {
+            transform: scale(1.02);
+        }
+
+        .gift-box .day-number {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+
+        .gift-box .gift-icon {
+            font-size: 3rem;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            transition: transform 0.3s ease;
+        }
+
+        .gift-box:hover .gift-icon {
+            transform: scale(1.1);
+        }
+
+        .gift-box.opened .gift-icon {
+            display: none;
+        }
+
+        /* Előnézeti kép a megnyitott ajándékban */
+        .gift-box .preview-image {
+            display: none;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .gift-box.opened .preview-image {
+            display: block;
+        }
+
+        .gift-box.opened::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%);
+            border-radius: 12px;
+        }
+
+        /* Színes csomagolások */
+        .gift-box[data-color="red"] {
+            background: linear-gradient(135deg, #c41e3a 0%, #8b1428 100%);
+        }
+
+        .gift-box[data-color="green"] {
+            background: linear-gradient(135deg, #2d5016 0%, #1a3009 100%);
+        }
+
+        .gift-box[data-color="gold"] {
+            background: linear-gradient(135deg, #ffd700 0%, #daa520 100%);
+        }
+
+        .gift-box[data-color="blue"] {
+            background: linear-gradient(135deg, #4169e1 0%, #1e3a8a 100%);
+        }
+
+        .gift-box[data-color="purple"] {
+            background: linear-gradient(135deg, #9b59b6 0%, #6c3483 100%);
+        }
+
+        .gift-box[data-color="silver"] {
+            background: linear-gradient(135deg, #c0c0c0 0%, #808080 100%);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            animation: slideIn 0.5s ease;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            margin: auto;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .modal-close:hover {
+            background: #c41e3a;
+            transform: rotate(90deg);
+        }
+
+        .modal-media {
+            width: 100%;
+            max-height: 50vh;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-media img,
+        .modal-media video {
+            max-width: 100%;
+            max-height: 50vh;
+            width: auto;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+
+        .modal-text {
+            color: #fff;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-text h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 2rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Reset gomb */
+        .reset-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #c41e3a;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(196, 30, 58, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .reset-button:hover {
+            background: #8b1428;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(196, 30, 58, 0.6);
+        }
+
+        /* Locked message */
+        .locked-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            color: #c41e3a;
+            padding: 30px 40px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            z-index: 2001;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: none;
+            animation: bounceIn 0.5s ease;
+        }
+
+        .locked-message.show {
+            display: block;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: translate(-50%, -50%) scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+            70% {
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            header p {
+                font-size: 1rem;
+            }
+
+            .intro-text {
+                font-size: 1.5rem;
+                padding: 15px 30px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .modal-media {
+                max-height: 40vh;
+            }
+
+            .modal-media img,
+            .modal-media video {
+                max-height: 40vh;
+            }
+
+            .modal-text {
+                font-size: 1rem;
+                padding: 15px;
+            }
+
+            .modal-text h2 {
+                font-size: 1.5rem;
+            }
+
+            .gift-box .gift-icon {
+                font-size: 2rem;
+            }
+
+            .gift-box .day-number {
+                width: 25px;
+                height: 25px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="backgroundMusic" loop>
+    <source src="zene.mp3" type="audio/mpeg">
+</audio>
+
+    <!-- Videó intro -->
+    <div class="video-intro" id="videoIntro">
+        <video id="introVideo" autoplay muted loop playsinline>
+            <source src="gif.mp4" type="video/mp4">
+        </video>
+        <div class="intro-text" id="introText">Kattints az ajándékodért! 🎁</div>
+    </div>
+
+    <!-- Ajtó animáció -->
+    <div class="door-container" id="doorContainer">
+        <div class="door left"></div>
+        <div class="door right"></div>
+    </div>
+
+    <!-- Fő tartalom -->
+    <div class="main-container" id="mainContainer" style="display: none;">
+        <header>
+            <h1>🎄 Panka Adventi Kalendáriuma 🎄</h1>
+            <p>24 meglepetés az ajándékodhoz ❤️</p>
+        </header>
+
+        <div class="calendar-grid" id="calendarGrid">
+            <!-- A boxok dinamikusan generálódnak -->
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">×</button>
+            <div class="modal-media" id="modalMedia"></div>
+            <div class="modal-text" id="modalText"></div>
+        </div>
+    </div>
+
+    <!-- Locked message -->
+    <div class="locked-message" id="lockedMessage">
+        Nana, még nem szabad Panka, ne legyél türelmetlen! 😊
+    </div>
+
+    <!-- Reset gomb -->
+    <button class="reset-button" id="resetButton">Reset All (Teszt)</button>
+
+    <script>
+        // Konfiguráció - ITT ADD MEG A TARTALMAT
+        const giftData = [
+            {
+                day: 1,
+                type: 'image',
+                src: '1.png',
+                title: '1. nap',
+                text: 'Kedves Panka! ❤️ Tudod, miért kapod most az ajándékod?  korán, késve, de pontosan időben? Mert ez nem egy egyszerű ajándék... Ez egy Adventi Kalendárium december 3-ra, a születésnapodra! 24 nap, 24 meglepetés, és az utolsó dobozban... nos, ott vár rád a karácsonyi ajándékod is! 🎄🎁'
+            },
+            {
+                day: 2,
+                type: 'image',
+                src: '2.png',
+                title: '2. nap',
+                text: 'Hulla fáradt vagyok... 😴 És tudod, ki a hibás? Te, te makacs! Az elmúlt napokban mindig fent voltál, nehogy már haladni tudjak az ajándékoddal.. 😅 Viszont.. Ez pont az egyik dolog, amit a legjobban szeretek benned. A makacsságod. Ez az a tulajdonságod, ami nélkül Panka nem is lenne Panka. És bár néha őrületbe kerget, nélküle hiányozna valami. Szóval maradj ilyen, kérlek! c:'
+            },
+            {
+                day: 3,
+                type: 'image',
+                src: '3.png',
+                title: '3. nap',
+                text: 'Egy éve ugyan ezen a napon megsirattalak egy aprósággal, amit neked szántam, hogy tudassam veled, milyen fontos is vagy. Egy év telt el... És milyen sokminden történt velünk.. És azóta is tényleg, azt érzem, hogy te valaki igazán különleges és meghatározó vagy az életemben.. Olyan ritka dolog igazi kapcsolatot találni, olyat, amiben mindketten otthon érezhetjük magunkat, bárhol is járunk. Ami barátságnak indult, mára valami különlegessé vált. Valami olyanná, amiért hálás vagyok minden nap. Most 21 vagy, de remélem, ez csak a kezdet. Remélem, még nagyon sokáig részese lehetek az életednek.:) Boldog születésnapot, Panka! ❤️ Köszönöm, hogy itt vagy. Köszönöm, hogy vagy. '
+            },
+            {
+                day: 4,
+                type: 'image',
+                src: '4.png',
+                title: '4. nap',
+                text: 'A negyedik nap szövege...'
+            },
+            {
+                day: 5,
+                type: 'image',
+                src: '5.png',
+                title: '5. nap',
+                text: 'Az ötödik nap szövege...'
+            },
+            {
+                day: 6,
+                type: 'image',
+                src: '6.png',
+                title: '6. nap',
+                text: 'A hatodik nap szövege...'
+            },
+            {
+                day: 7,
+                type: 'image',
+                src: '7.png',
+                title: '7. nap',
+                text: 'A hetedik nap szövege...'
+            },
+            {
+                day: 8,
+                type: 'image',
+                src: '8.png',
+                title: '8. nap',
+                text: 'A nyolcadik nap szövege...'
+            },
+            {
+                day: 9,
+                type: 'image',
+                src: '9.png',
+                title: '9. nap',
+                text: 'A kilencedik nap szövege...'
+            },
+            {
+                day: 10,
+                type: 'image',
+                src: '10.png',
+                title: '10. nap',
+                text: 'A tizedik nap szövege...'
+            },
+            {
+                day: 11,
+                type: 'image',
+                src: '11.png',
+                title: '11. nap',
+                text: 'A tizenegyedik nap szövege...'
+            },
+            {
+                day: 12,
+                type: 'image',
+                src: '12.png',
+                title: '12. nap',
+                text: 'A tizenkettedik nap szövege...'
+            },
+            {
+                day: 13,
+                type: 'image',
+                src: '13.png',
+                title: '13. nap',
+                text: 'A tizenharmadik nap szövege...'
+            },
+            {
+                day: 14,
+                type: 'image',
+                src: '14.png',
+                title: '14. nap',
+                text: 'A tizennegyedik nap szövege...'
+            },
+            {
+                day: 15,
+                type: 'image',
+                src: '15.png',
+                title: '15. nap',
+                text: 'A tizenötödik nap szövege...'
+            },
+            {
+                day: 16,
+                type: 'image',
+                src: '16.png',
+                title: '16. nap',
+                text: 'A tizenhatodik nap szövege...'
+            },
+            {
+                day: 17,
+                type: 'image',
+                src: '17.png',
+                title: '17. nap',
+                text: 'A tizenhetedik nap szövege...'
+            },
+            {
+                day: 18,
+                type: 'image',
+                src: '18.png',
+                title: '18. nap',
+                text: 'A tizennyolcadik nap szövege...'
+            },
+            {
+                day: 19,
+                type: 'image',
+                src: '19.png',
+                title: '19. nap',
+                text: 'A tizenkilencedik nap szövege...'
+            },
+            {
+                day: 20,
+                type: 'image',
+                src: '20.png',
+                title: '20. nap',
+                text: 'A huszadik nap szövege...'
+            },
+            {
+                day: 21,
+                type: 'image',
+                src: '21.png',
+                title: '21. nap',
+                text: 'A huszonegyedik nap szövege...'
+            },
+            {
+                day: 22,
+                type: 'image',
+                src: '22.png',
+                title: '22. nap',
+                text: 'A huszonkettedik nap szövege...'
+            },
+            {
+                day: 23,
+                type: 'image',
+                src: '23.png',
+                title: '23. nap',
+                text: 'A huszonharmadik nap szövege...'
+            },
+            {
+                day: 24,
+                type: 'image',
+                src: '24.png',
+                title: '24. nap',
+                text: 'A huszonnegyedik nap szövege... 🎄'
+            }
+        ];
+
+        const colors = ['red', 'green', 'gold', 'blue', 'purple', 'silver'];
+        let openedDays = JSON.parse(localStorage.getItem('openedDays')) || [];
+
+        // Elemek
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const videoIntro = document.getElementById('videoIntro');
+        const introText = document.getElementById('introText');
+        const doorContainer = document.getElementById('doorContainer');
+        const mainContainer = document.getElementById('mainContainer');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const modal = document.getElementById('modal');
+        const modalMedia = document.getElementById('modalMedia');
+        const modalText = document.getElementById('modalText');
+        const modalClose = document.getElementById('modalClose');
+        const lockedMessage = document.getElementById('lockedMessage');
+        const resetButton = document.getElementById('resetButton');
+
+        // Intro szöveg megjelenítése 3 másodperc késleltetéssel
+        setTimeout(() => {
+            introText.classList.add('visible');
+        }, 3000);
+
+        // Intro animáció
+        videoIntro.addEventListener('click', () => {
+            doorContainer.classList.add('open');
+            setTimeout(() => {
+                videoIntro.classList.add('hidden');
+                mainContainer.style.display = 'block';
+                setTimeout(() => {
+                    videoIntro.remove();
+                    doorContainer.remove();
+                }, 1000);
+            }, 2000);
+        });
+
+        // Hóesés
+        function createSnowflakes() {
+            const snowflakeCount = 50;
+            for (let i = 0; i < snowflakeCount; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                snowflake.textContent = '❄';
+                snowflake.style.left = Math.random() * 100 + '%';
+                snowflake.style.animationDuration = Math.random() * 3 + 2 + 's';
+                snowflake.style.animationDelay = Math.random() * 5 + 's';
+                snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+                snowflake.style.opacity = Math.random();
+                document.body.appendChild(snowflake);
+            }
+        }
+
+        // Naptár generálás
+        function generateCalendar() {
+            giftData.forEach((gift, index) => {
+                const box = document.createElement('div');
+                box.classList.add('gift-box');
+                box.dataset.color = colors[index % colors.length];
+                box.dataset.day = gift.day;
+
+                const dayNumber = document.createElement('div');
+                dayNumber.classList.add('day-number');
+                dayNumber.textContent = gift.day;
+
+                const giftIcon = document.createElement('div');
+                giftIcon.classList.add('gift-icon');
+                giftIcon.textContent = '🎁';
+
+                // Előnézeti kép elem
+                const previewImg = document.createElement('img');
+                previewImg.classList.add('preview-image');
+                previewImg.src = gift.src;
+                previewImg.alt = gift.title;
+
+                box.appendChild(previewImg);
+                box.appendChild(dayNumber);
+                box.appendChild(giftIcon);
+
+                if (openedDays.includes(gift.day)) {
+                    box.classList.add('opened');
+                }
+
+                box.addEventListener('click', () => handleBoxClick(gift, box));
+
+                calendarGrid.appendChild(box);
+            });
+        }
+
+        // Box kattintás kezelés
+        function handleBoxClick(gift, box) {
+            const now = new Date();
+            const budapestTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Budapest' }));
+            const currentDay = budapestTime.getDate();
+            const currentMonth = budapestTime.getMonth();
+
+            // December 1-24 között engedélyezett
+            if (currentMonth === 11 && gift.day <= currentDay) {
+                // Mindig teljes nézetet mutat (kép + szöveg)
+                showFullView(gift);
+                
+                if (!openedDays.includes(gift.day)) {
+                    openedDays.push(gift.day);
+                    localStorage.setItem('openedDays', JSON.stringify(openedDays));
+                    box.classList.add('opened');
+                }
+            } else {
+                // Zárolva
+                lockedMessage.classList.add('show');
+                setTimeout(() => {
+                    lockedMessage.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Teljes nézet (kép + szöveg) - MINDIG EZT HASZNÁLJA
+        function showFullView(gift) {
+            modalMedia.innerHTML = '';
+            modalText.innerHTML = '';
+
+            if (gift.type === 'video') {
+                const video = document.createElement('video');
+                video.src = gift.src;
+                video.controls = true;
+                video.autoplay = true;
+                video.loop = gift.src.endsWith('.mp4');
+                modalMedia.appendChild(video);
+            } else {
+                const img = document.createElement('img');
+                img.src = gift.src;
+                img.alt = gift.title;
+                modalMedia.appendChild(img);
+            }
+
+            // Szöveg hozzáadása
+            const titleElement = document.createElement('h2');
+            titleElement.textContent = gift.title;
+            
+            const textElement = document.createElement('p');
+            textElement.textContent = gift.text;
+            
+            modalText.appendChild(titleElement);
+            modalText.appendChild(textElement);
+            
+            modal.classList.add('active');
+        }
+
+        // Modal bezárás
+        modalClose.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+        // Reset gomb
+        resetButton.addEventListener('click', () => {
+            if (confirm('Biztosan törölni szeretnéd az összes megnyitott napot? (Csak teszteléshez!)')) {
+                localStorage.removeItem('openedDays');
+                openedDays = [];
+                location.reload();
+            }
+        });
+
+        // Inicializálás
+        createSnowflakes();
+        generateCalendar();
+
+        // Zene indítása
+window.addEventListener('load', () => {
+    backgroundMusic.play().catch(err => {
+        console.log('Autoplay letiltva, felhasználói interakcióra vár');
+    });
+});
+
+// Ha az autoplay letiltott, első kattintásra indítjuk
+document.addEventListener('click', () => {
+    if (backgroundMusic.paused) {
+        backgroundMusic.play();
+    }
+}, { once: true });
+
+    </script>
+</body>
+</html>
