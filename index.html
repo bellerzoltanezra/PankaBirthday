@@ -420,29 +420,6 @@
             text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
 
-        /* Reset gomb */
-        .reset-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #c41e3a;
-            color: #fff;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 4px 12px rgba(196, 30, 58, 0.4);
-            transition: all 0.3s ease;
-        }
-
-        .reset-button:hover {
-            background: #8b1428;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(196, 30, 58, 0.6);
-        }
-
         /* Locked message */
         .locked-message {
             position: fixed;
@@ -577,8 +554,7 @@
         Nana, még nem szabad Panka, ne legyél türelmetlen! 😊
     </div>
 
-    <!-- Reset gomb -->
-    <button class="reset-button" id="resetButton">Reset All (Teszt)</button>
+
 
     <script>
         // Konfiguráció - ITT ADD MEG A TARTALMAT
@@ -768,7 +744,6 @@
         const modalText = document.getElementById('modalText');
         const modalClose = document.getElementById('modalClose');
         const lockedMessage = document.getElementById('lockedMessage');
-        const resetButton = document.getElementById('resetButton');
 
         // Intro szöveg megjelenítése 3 másodperc késleltetéssel
         setTimeout(() => {
@@ -906,15 +881,6 @@
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.classList.remove('active');
-            }
-        });
-
-        // Reset gomb
-        resetButton.addEventListener('click', () => {
-            if (confirm('Biztosan törölni szeretnéd az összes megnyitott napot? (Csak teszteléshez!)')) {
-                localStorage.removeItem('openedDays');
-                openedDays = [];
-                location.reload();
             }
         });
 
